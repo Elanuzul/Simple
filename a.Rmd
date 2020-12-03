@@ -1,0 +1,86 @@
+---
+title: "UTS"
+author: "Ela Nuzul Rahmawati - 221810260 - 3SI1"
+date: "10/27/2020"
+output: word_document
+---
+```{r}
+library(readr)
+amphibians <- read_delim("C:/Users/ASUS/Downloads/dataset (2).csv", ";", escape_double = FALSE, trim_ws = TRUE)
+head(amphibians)
+```
+```{r}
+# Data Cleaning
+colnames(amphibians)<-amphibians[1,]
+amphibians <- amphibians[-1,]
+
+# Karena klasifikasi keberadaan katak jenis brown frogs maka kolom jenis katak selain brown frogs dihilangkan
+amphibians <- amphibians[,-c(19:23)]
+amphibians <- amphibians[,-17]
+
+# Kolom ID dan Motorways dihilangkan karena tidak digunakan di dalam perhitungan
+amphibians <- amphibians[,-c(1,2)]
+amphibians$SR <- as.numeric(amphibians$SR)
+amphibians$NR <- as.numeric(amphibians$NR)
+amphibians$OR <- as.numeric(amphibians$OR)
+
+# Atribut numerik SR dikategorikan
+amphibians$SR <- cut(amphibians$SR, breaks = quantile(amphibians$SR, c(0, 0.33, 0.67, 1)), labels = c('small', 'medium', 'large'))
+amphibians$SR
+head(amphibians)
+```
+
+
+```{r}
+IsPure <- function(data) {
+  length(unique(data[,ncol(data)])) == 1
+}
+```
+
+```{r}
+Entropy <- function( vls ) {
+  res <- vls/sum(vls) * log2(vls/sum(vls))
+  res[vls == 0] <- 0
+  -sum(res)
+}
+```
+
+```{r}
+InformationGain <- function( tble ) {
+  tble <- as.data.frame.matrix(tble)
+  entropyBefore <- Entropy(colSums(tble))
+  s <- rowSums(tble)
+  entropyAfter <- sum (s / sum(s) * apply(tble, MARGIN = 1, FUN = Entropy ))
+  informationGain <- entropyBefore - entropyAfter
+  return (informationGain)
+}
+```
+
+```{r}
+library(data.tree)
+```
+
+```{r}
+InformationGain(table(amphibians[,c('SR','Brown frogs')]))
+InformationGain(table(amphibians[,c('NR','Brown frogs')]))
+InformationGain(table(amphibians[,c('TR','Brown frogs')]))
+InformationGain(table(amphibians[,c('VR','Brown frogs')]))
+InformationGain(table(amphibians[,c('SUR1','Brown frogs')]))
+InformationGain(table(amphibians[,c('SUR2','Brown frogs')]))
+InformationGain(table(amphibians[,c('SUR3','Brown frogs')]))
+InformationGain(table(amphibians[,c('UR','Brown frogs')]))
+InformationGain(table(amphibians[,c('FR','Brown frogs')]))
+InformationGain(table(amphibians[,c('OR','Brown frogs')]))
+InformationGain(table(amphibians[,c('RR','Brown frogs')]))
+InformationGain(table(amphibians[,c('BR','Brown frogs')]))
+InformationGain(table(amphibians[,c('MR','Brown frogs')]))
+InformationGain(table(amphibians[,c('CR','Brown frogs')]))
+```
+```{r}
+# Dari hasil information gain maka atribut maka atribut yang akan dipilih adalah TR, VR, dan SUR1 kemudian atribut lain (kolom 6 sd 14) dihilangkan 
+amphibians <- amphibians[,-c(1,2,6:14)]
+library(dplyr)
+amphi$`Brown frogs` <-recode(amphi$`Brown frogs`, `0` = "No", `1` = "Yes")
+head(amphi)
+```
+Dilanjutkan di Weka
